@@ -1,0 +1,461 @@
+#!/bin/bash
+clear
+generate_random_string() {
+    tr -dc A-Za-z0-9 </dev/urandom | head -c 20
+}
+generate_color() {
+    local start_color=$1
+    local end_color=$2
+    local steps=$3
+    local index=$4
+
+    local start_r=$(( (start_color & 0xFF0000) >> 16 ))
+    local start_g=$(( (start_color & 0x00FF00) >> 8 ))
+    local start_b=$(( start_color & 0x0000FF ))
+    local end_r=$(( (end_color & 0xFF0000) >> 16 ))
+    local end_g=$(( (end_color & 0x00FF00) >> 8 ))
+    local end_b=$(( end_color & 0x0000FF ))
+
+    local r=$(( start_r + (end_r - start_r) * index / steps ))
+    local g=$(( start_g + (end_g - start_g) * index / steps ))
+    local b=$(( start_b + (end_b - start_b) * index / steps ))
+
+    printf "\033[38;2;%d;%d;%dm" $r $g $b
+}
+
+color() {
+  local text="$1"
+  local color="$2"
+  local newline="$3"
+  local highlight="$4"
+
+  # Extract the RGB values from the hex color code
+  local r=$(printf "%d" 0x${color:1:2})
+  local g=$(printf "%d" 0x${color:3:2})
+  local b=$(printf "%d" 0x${color:5:2})
+
+  # Generate the ANSI escape code for the color
+  local ansi_color="\033[38;2;${r};${g};${b}m"
+
+  # Generate ANSI escape code for highlighting
+  local ansi_highlight="\033[1m"
+  local ansi_reset="\033[0m"
+
+  # Build the output format based on highlight and newline
+  local output_format=""
+  if $highlight; then
+    output_format="${ansi_highlight}${ansi_color}${text}${ansi_reset}"
+  else
+    output_format="${ansi_color}${text}${ansi_reset}"
+  fi
+
+  # Print with or without newline
+  if $newline; then
+    echo -e "$output_format"
+  else
+    echo -en "$output_format"
+  fi
+}
+gprint() {
+    local input_string="$1"
+    local start_color=0x2565fa # Blue
+    local end_color=0xe85f31 # Purple
+    local delay1=0.02
+    local delay=${2:-0.02}
+    local newline="${3:-false}"
+    local length=${#input_string}
+
+    for (( i=0; i<$length; i++ )); do
+        generate_color $start_color $end_color $length $i
+        printf "${input_string:$i:1}"
+        sleep $delay
+    done
+    if [ "$newline" = "true" ]; then
+         echo -n -e "\033[0m"
+    else
+         echo -e "\033[0m"
+    fi
+}
+
+check_line() {
+    local line="$1"
+    if [[ "$line" == *"{username}"* ]]; then
+        return 0  # true
+    else
+        return 1  # false
+    fi
+}
+
+generate_gradient() {
+    local start_color=$1
+    local end_color=$2
+    local steps=$3
+    local index=$4
+    local char="$5"
+
+    
+    local start_r=$(( (start_color & 0xFF0000) >> 16 ))
+    local start_g=$(( (start_color & 0x00FF00) >> 8 ))
+    local start_b=$(( start_color & 0x0000FF ))
+    local end_r=$(( (end_color & 0xFF0000) >> 16 ))
+    local end_g=$(( (end_color & 0x00FF00) >> 8 ))
+    local end_b=$(( end_color & 0x0000FF ))
+
+    
+    local r=$(( start_r + (end_r - start_r) * index / steps ))
+    local g=$(( start_g + (end_g - start_g) * index / steps ))
+    local b=$(( start_b + (end_b - start_b) * index / steps ))
+
+        printf "\033[38;2;%d;%d;%dm%s\033[0m" $r $g $b "$char"
+}
+echo -e "\e[?25l"
+
+ascii_art=(
+"██╗     ██╗███╗   ██╗███████╗ █████╗  ██████╗ ███████╗"
+"██║     ██║████╗  ██║██╔════╝██╔══██╗██╔════╝ ██╔════╝"
+"██║     ██║██╔██╗ ██║█████╗  ███████║██║  ███╗█████╗"
+"██║     ██║██║╚██╗██║██╔══╝  ██╔══██║██║   ██║██╔══╝"
+"███████╗██║██║ ╚████║███████╗██║  ██║╚██████╔╝███████╗"
+"╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝"
+)
+
+
+start_color=0x2565fa
+end_color=0xe85f31
+
+
+for line in "${ascii_art[@]}"; do
+    
+    line_length=${#line}
+    
+   
+    for ((i=0; i<line_length; i++)); do
+        char="${line:i:1}"
+        generate_gradient $start_color $end_color $line_length $i "$char"
+    done
+    
+    echo
+done
+
+
+echo ""
+echo ""
+color "[" "#ffffff" false
+color "+" "#2565fa" false
+color "]" "#ffffff" false
+color " welcome to lineage, enjoy your stay" "#ffffff" true
+echo ""
+selected=1
+tput sc
+color " > " "#29f258" false
+color "[ " "#ffffff" false; color "start search" "#ffffff" false; color " ]" "#ffffff" true;
+color "   [ " "#ffffff" false; color "edit sites file" "#db8a2e" false; color " ]" "#ffffff" true;
+color "   [ " "#ffffff" false; color "exit" "#db8a2e" false; color " ]" "#ffffff" true;
+while true; do
+	read -s -n 1 key
+	case $key in
+		'A')
+			if [ "$selected" -eq 1 ]; then
+				let "selected=3"
+			else
+				let "selected=selected-1"
+			fi
+			;;
+		'B')
+			if [ "$selected" -eq 3 ]; then
+				let "selected=1"
+			else
+				let "selected=selected+1"
+			fi
+			;;
+		'')
+			break
+			;;
+	esac
+	tput rc
+
+	if [ "$selected" -eq 1 ]; then
+		color " > " "#29f258" false
+		color "[ " "#ffffff" false; color "start search" "#ffffff" false; color " ]     " "#ffffff" true;
+		color "   [ " "#ffffff" false; color "edit sites file" "#db8a2e" false; color " ]    " "#ffffff" true;
+		color "   [ " "#ffffff" false; color "exit" "#db8a2e" false; color " ]     " "#ffffff" false;		
+		echo ""
+	fi
+	if [ "$selected" -eq 2 ]; then
+		color "   [ " "#ffffff" false; color "start search" "#db8a2e" false; color " ]    " "#ffffff" true;
+		color " > " "#29f258" false
+		color "[ " "#ffffff" false; color "edit sites file" "#ffffff" false; color " ]    " "#ffffff" true;
+		color "   [ " "#ffffff" false; color "exit" "#db8a2e" false; color " ]    " "#ffffff" false;
+		echo ""
+	fi
+	if [ "$selected" -eq 3 ]; then
+		color "   [ " "#ffffff" false; color "start search" "#db8a2e" false; color " ]    " "#ffffff" true;
+		color "   [ " "#ffffff" false; color "edit sites file" "#db8a2e" false; color " ]     " "#ffffff" true;
+		color " > " "#29f258" false;
+		color "[ " "#ffffff" false; color "exit" "#ffffff" false; color " ]     " "#ffffff" false;
+		echo ""
+	fi
+done
+tput rc
+echo "                                                             "
+echo "                                                             "
+echo "                                                             "
+tput rc
+
+case $selected in
+	1)
+		echo -e "\033[3A"
+		exists="false"
+		SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+                FILE="$SCRIPT_DIR/sites.txt"
+		lines="false"
+                if [[ -f "$FILE" ]]; then
+			let "exists=true"
+		else
+			tput sc
+			color "[" "#ffffff" false; color "x" "#ff0400" false; color "]" "#ffffff" false; color " lineage: error: sites.txt file does not exist" "#ffffff" true;
+			color "[" "#ffffff" false; color "?" "#de1dde" false; color "]" "#ffffff" false; color " create one now? (y/n)" "#ffffff" true;
+			while true; do
+				read -s -n 1 key
+				case $key in
+					y|Y)
+						echo "to add a site, put the url and then add '{username}' to where the username should go (example: github.com/{username}), followed by a newline for each site" > sites.txt
+						vim sites.txt
+						break
+						;;
+					n|N)
+						tput rc
+						echo "                                                                               "
+						echo "                                                                               "
+						$0
+						if [ $? -eq 1 ]; then
+							exit 1
+						fi
+						;;
+					*)
+						;;
+				esac
+
+			done
+
+		fi
+		if [ "$exists" = "false" ]; then
+			echo -en "\033[2A"
+			echo "                                                   "
+			echo "                                                   "
+			echo -en "\033[2A"
+		fi
+		while true; do
+			line_count=$(wc -l < "$FILE")
+			if [ "$line_count" -eq 1 ]; then
+				color "[" "#ffffff" false; color "x" "#ff0400" false; color "]" "#ffffff" false;
+				color "lineage: error: 'sites.txt' has no sites in it" "#ffffff" true;
+				color "[" "#ffffff" false; color "?" "#de1dde" false; color "]" "#ffffff" false;
+				color " edit 'sites.txt'? (y/n)" "#ffffff" true;
+				while true; do
+					read -s -n 1 key1
+					case $key1 in 
+						y|Y)
+							echo -en "\033[2A"
+							echo "                                                     "
+							echo "                                                     "
+							echo -en "\033[2A"
+							vim sites.txt
+							break
+							;;
+						n|N)
+							$0
+							if [ $? -eq 1 ]; then
+								exit 1
+							fi
+							;;
+						*)
+
+							;;
+					esac
+				done
+			else
+				break
+			fi
+		done
+		amount=0
+		prt_lines=0
+		while true; do
+			let "amount=0"
+			let "prt_lines=0"
+			while IFS= read -r line; do
+				let "prt_lines=prt_lines+1"
+		       		if ! check_line "$line"; then
+					let "amount=amount+1"
+					color "[" "#ffffff" false; color "x" "#ff0400" false; color "]" "#ffffff" false;
+					color " lineage: error: Line $prt_lines in sites.txt doesn't have a '{username}' assined" "#ffffff" true;
+				fi
+			done < "$FILE"
+			if [ $amount -gt 0 ]; then
+				color "[" "#ffffff" false; color "?" "#de1dde" false; color "]" "#ffffff" false;
+				color "edit 'sites.txt'? (y/n)" "#ffffff" true;
+				while true; do
+					read -s -n 1 key2
+					case $key2 in
+						y|Y)
+							amt_lines=0
+							let "amt_lines=amount+1"
+							echo -en "\033[${amt_lines}A"
+							for (( i=1; i<=${amt_lines}; i++ )); do
+    								echo "                                                                                    "
+							done
+							echo -en "\033[${amt_lines}A"
+							vim $FILE
+							break
+							;;
+						n|N)
+							$0
+							if [ $? -eq 1 ]; then
+								exit 1
+							fi
+							;;
+						*)
+							;;
+					esac
+				done
+			else
+				break
+			fi
+		done
+		if [ ! -d "$SCRIPT_DIR/fetched-sites" ]; then
+			color "[" "#ffffff" false; color "x" "#ff0400" false; color "]" "#ffffff" false;
+			color " Lineage: error: directory 'fetched-sites' does not exist" "#ffffff" true;
+			color "[" "#ffffff" false; color "?" "#de1dde" false; color "]" "#ffffff" false;
+			color " create directory now? (y/n)" "#ffffff" true;
+			while true; do
+				read -s -n 1 key3
+				case $key3 in
+					y|Y)
+						echo -en "\033[2A"
+						echo "                                                                 "
+						echo "                                                                 "
+						echo -en "\033[2A"
+						mkdir "$SCRIPT_DIR/fetched-sites"
+						break
+						;;
+					n|N)
+						$0
+						if [ $? -eq 1 ]; then
+							exit 1
+						fi
+						;;
+					*)
+						;;
+				esac
+			done
+		fi
+
+		
+
+
+
+		color "[" "#ffffff" false; color "?" "#de1dde" false; color "]" "#ffffff" false; color " please provide a username for the search query" "#ffffff" true;
+		echo ""
+		current_time=$(date +"%I:%M %p")
+		stripped_time=${current_time:0:-2}
+		username=$(whoami)
+		string="$username@lineage"
+		color "$stripped_time" "#db8a2e" false
+		echo -ne '\033[1D'
+	       	color "|" "#ffffff" false
+		gprint "$string" 0 true
+		
+		echo -ne '\033[8D'
+		echo -n "@"
+		echo -ne '\033[7C'
+		echo -n ": > "
+		echo -n -e "\e[?25h"
+		read input_username
+		
+		echo -ne "\033[3A"
+		echo "                                                                  "
+		echo "                                                                  "
+		echo "                                                                  "
+		echo -en "\033[3A"
+
+		skip_first=1
+
+		while IFS= read -r line; do
+
+			if [ "$skip_first" -eq 1 ]; then
+        			skip_first=0
+			       	continue
+			fi
+
+                        # im going to add notes here because im NOT going
+                        # to remember what this does :sobbing:
+
+                        random_string=$(generate_random_string)
+                        url=$(echo "$line" | sed "s/{username}/$random_string/")
+                        wget -q -O "fetched-sites/${random_string}.html" "$url"
+
+                        # generate a random string and replace "{username}" with
+                        # it, then fetch the page and store it, this is so we know
+                        # what the resulting page will look like if the user doesn't
+                        # exist
+
+
+                        user_url=$(echo "$line" | sed "s/{username}/$input_username/")
+                        wget -q -O "fetched-sites/${input_username}.html" "$user_url"
+
+                        # go to the link with the username of what the user inputted
+                        # and store it
+
+
+                        if cmp -s "fetched-sites/${random_string}.html" "fetched-sites/${input_username}.html"; then
+				color "[" "#ffffff" false; color "x" "#ff0400" false;
+				color "]" "#ffffff" false
+				color " the account '" "#ffffff" false
+				color "$user_url" "#ff0400" false
+				color "' does not exist" "#ffffff" true
+				echo ""
+	   		else
+				color "[" "#ffffff" false; color "✓" "#29f258" false;
+				color "]" "#ffffff" false;
+				color " the account '" "#ffffff" false
+				color "$user_url" "#29f258" false
+				color "' exists" "#ffffff" true
+				echo ""
+                        fi
+			
+
+                done < sites.txt
+		color "[" "#ffffff" false; color "+" "#29f258" false; color "]" "#ffffff" false;
+		color " finished!" "#ffffff" true
+		color "[" "#ffffff" false; color "?" "#de1dde" false;
+		color "]" "#ffffff" false;
+		color " return to main menu? (y/n)" "#ffffff" true
+		while true; do
+			read -s -n 1 keyout
+			case $keyout in
+				y|Y)
+					$0
+					if [ $? -eq 1 ]; then
+						exit 1
+					fi
+					;;
+				n|N)
+					clear
+					exit 1
+					;;
+				*)
+					;;
+			esac
+		done
+		;;
+	2)
+		clear
+		vim sites.txt
+		;;
+	3)
+		clear
+		exit 1
+		;;
+esac
+
+
