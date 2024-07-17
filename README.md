@@ -11,4 +11,11 @@ A messy, poorly coded Bash script that provides a way to search multiple user-se
 4. (optional) customize sites.txt
 5. `./lineage`
 
+## potetal issues
+
+when selecting "edit sites.txt" it assumes you have vim installed and trys to open it with that, if you don't i imagine it will break.
+ill fix this soon.
+
+
+
 ![lineage](https://github.com/the8bitbyte/Lineage/blob/main/lineage.gif?raw=true)
