@@ -11,4 +11,4 @@ A messy, poorly coded Bash script that provides a way to search multiple user-se
 4. (optional) customize sites.txt
 5. `./lineage`
 
-![lineage]([url_to_your_gif.gif](https://github.com/the8bitbyte/Lineage/blob/main/lineage.gif?raw=true))
+![lineage](https://github.com/the8bitbyte/Lineage/blob/main/lineage.gif?raw=true)
