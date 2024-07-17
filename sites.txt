@@ -1,0 +1,11 @@
+to add a site, put the url and then add '{username}' to where the username should go (example: github.com/{username}), followed by a newline for each site
+github.com/{username}
+www.youtube.com/@{username}
+www.instagram.com/{username}
+watchpeopledie.tv/@{username}
+x.com/{username}
+www.reddit.com/user/{username}
+www.tiktok.com/@{username}
+www.pinterest.com/{username}
+www.tumblr.com/{username}
+steamcommunity.com/id/{username}
