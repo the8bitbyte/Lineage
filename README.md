@@ -19,4 +19,5 @@ ill fix this soon.
 
 
 ![lineage](https://github.com/the8bitbyte/Lineage/blob/main/lineage.gif?raw=true)
+
 (sorry for poor quality there dont appear to be many good video to gif converters that perserve quality)
